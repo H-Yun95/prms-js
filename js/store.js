@@ -11,7 +11,7 @@
        category: "식사",
        amount: 20000,
        fundsAtTheTime: 9978000,
-     }[]
+     }[] 기본 데이터 객체를 표시해놓은 방식을 처음에 서술
   }
  */
 export const store = {
@@ -49,13 +49,15 @@ export function initStore() {
 
 export function addNewHistory(newHistory) {
   try {
-    // TODO:
-    /**
-     * - store의 detailList 새로 갱신
-     * - store.currentFunds 새로 갱신
-     */
-    store.detailList = null;
-    store.currentFunds = null;
+    if (store.detailList[store.todayId]) {
+      store.detailList[store.todayId] =
+       store.detailList[store.todayId].push(newHistory);
+    } else {
+      store.detailList[store.todayId] = [newHistory];
+    }
+    
+    // 현재 자산 = 원래 자산 - 사용 금액
+    store.currentFunds -= newHistory.amount;
 
     updateStorage();
     return true;
@@ -72,7 +74,13 @@ export function removeHistory(dateId, itemId) {
      * - store의 detailList 새로 갱신
      * - store.currentFunds 새로 갱신
      */
-    store.detailList[dateId] = null;
+    // 기존 배열 -> 삭제 요소를 제거한 배열 재할당
+    store.detailList[dateId] = store.detailList[dateId].filter(( {id, amount} ) => {
+      if (id === Number(itemId)) {
+        store.currentFunds += amount;
+      }
+      return id !== Number(itemId);
+    });
 
     updateStorage();
     return true;
